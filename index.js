@@ -1,55 +1,42 @@
-// index.js
-
 const express = require('express');
-const cors = require('cors');  // Apenas uma vez
-const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = 10000;
 
-// Habilitando o CORS para permitir requisições de diferentes origens
-app.use(cors());
+app.use(cors());  // Permite requisições de qualquer origem
+app.use(express.json());
 
-// Middleware para parsear o corpo das requisições como JSON
-app.use(bodyParser.json());
+let ataques = [];  // Aqui serão armazenados os dados dos ataques recebidos
 
-// Dados de exemplo para simular a API de ataques
-let ataques = {};
+// Endpoint para coletar ataques de todos os jogadores
+app.get('/api/ataques', (req, res) => {
+    res.json({ ataques });
+});
 
-// Endpoint para receber os ataques
+// Endpoint para limpar os dados dos ataques (deleta os dados antigos)
+app.delete('/api/ataques', (req, res) => {
+    ataques = [];  // Limpa a lista de ataques
+    res.json({ success: true, message: "Dados apagados com sucesso!" });
+});
+
+// Endpoint para coletar ataques de um jogador específico
+app.get('/api/ataques/:jogador', (req, res) => {
+    const { jogador } = req.params;
+    const ataquesJogador = ataques.filter(atk => atk.defender === jogador);  // Filtra ataques para um jogador específico
+    res.json(ataquesJogador);
+});
+
+// Endpoint para adicionar ataques (simulando que um jogador enviou seus dados)
 app.post('/api/ataques', (req, res) => {
     const { jogador, ataques: novosAtaques } = req.body;
+    ataques = ataques.filter(atk => atk.defender !== jogador);  // Remove ataques antigos do jogador
+    ataques.push(...novosAtaques);  // Adiciona novos ataques
 
-    // Verificar se já existe dados para o jogador
-    if (!ataques[jogador]) {
-        ataques[jogador] = [];
-    }
-
-    // Adicionar os novos ataques ao jogador específico
-    ataques[jogador] = [...ataques[jogador], ...novosAtaques];
-    console.log(`Novos ataques recebidos para o jogador ${jogador}:`, novosAtaques);
-    res.json({ success: true });
+    console.log(`🎯 [DEBUG] Dados de ataques recebidos e processados para ${jogador}`);
+    res.json({ success: true, message: "Ataques adicionados com sucesso!" });
 });
 
-// Endpoint para acessar os ataques de um jogador
-app.get('/api/ataques/:jogador', (req, res) => {
-    const jogador = req.params.jogador;
-
-    if (ataques[jogador]) {
-        res.json(ataques[jogador]);
-    } else {
-        res.json({ message: `Jogador ${jogador} não encontrado.` });
-    }
-});
-
-// Endpoint para deletar os ataques de um jogador
-app.delete('/api/ataques/:jogador', (req, res) => {
-    const jogador = req.params.jogador;
-    delete ataques[jogador];
-    res.json({ success: true, message: `Ataques do jogador ${jogador} deletados.` });
-});
-
-// Iniciar o servidor
+// Inicia o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
-
