@@ -10,13 +10,8 @@ let ataques = [];  // Aqui serão armazenados os dados dos ataques recebidos
 
 // Endpoint para coletar ataques de todos os jogadores
 app.get('/api/ataques', (req, res) => {
+    // Retorna todos os ataques cadastrados, sem filtro
     res.json({ ataques });
-});
-
-// Endpoint para limpar os dados dos ataques (deleta os dados antigos)
-app.delete('/api/ataques', (req, res) => {
-    ataques = [];  // Limpa a lista de ataques
-    res.json({ success: true, message: "Dados apagados com sucesso!" });
 });
 
 // Endpoint para coletar ataques de um jogador específico
