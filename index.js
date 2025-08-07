@@ -3,8 +3,10 @@ const cors = require('cors');
 const app = express();
 const PORT = 10000;
 
-// Permite requisições de qualquer origem (caso queira restringir, use a URL do site específico)
-app.use(cors({ origin: '*' }));  // Aceita qualquer origem
+// Pega a variável de ambiente CORS_ORIGIN, se não estiver configurada, permite todas as origens
+const corsOrigin = process.env.CORS_ORIGIN || '*';
+
+app.use(cors({ origin: corsOrigin }));  // Usa a variável de ambiente para a origem
 app.use(express.json());
 
 let ataques = [];  // Aqui serão armazenados os dados dos ataques recebidos
