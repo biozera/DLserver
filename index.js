@@ -3,15 +3,14 @@ const cors = require('cors');
 const app = express();
 const PORT = 10000;
 
-// Permite requisições de qualquer origem
-app.use(cors());  
+// Permite requisições de qualquer origem (caso queira restringir, use a URL do site específico)
+app.use(cors({ origin: '*' }));  // Aceita qualquer origem
 app.use(express.json());
 
 let ataques = [];  // Aqui serão armazenados os dados dos ataques recebidos
 
 // Endpoint para coletar ataques de todos os jogadores
 app.get('/api/ataques', (req, res) => {
-    // Retorna todos os ataques cadastrados, sem filtro
     res.json({ ataques });
 });
 
@@ -22,19 +21,17 @@ app.get('/api/ataques/:jogador', (req, res) => {
     res.json(ataquesJogador);
 });
 
-// Endpoint para adicionar ataques (simulando que um jogador enviou seus dados)
+// Endpoint para adicionar ataques
 app.post('/api/ataques', (req, res) => {
     const { jogador, ataques: novosAtaques } = req.body;
-
-    // Remove ataques antigos do jogador antes de adicionar os novos
-    ataques = ataques.filter(atk => atk.defender !== jogador);  
-    ataques.push(...novosAtaques);  // Adiciona os novos ataques recebidos ao array de ataques
+    ataques = ataques.filter(atk => atk.defender !== jogador);  // Remove ataques antigos do jogador
+    ataques.push(...novosAtaques);  // Adiciona novos ataques
 
     console.log(`🎯 [DEBUG] Dados de ataques recebidos e processados para ${jogador}`);
     res.json({ success: true, message: "Ataques adicionados com sucesso!" });
 });
 
-// Inicia o servidor na porta configurada
+// Inicia o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
