@@ -1,18 +1,21 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const PORT = 10000;
+const PORT = process.env.PORT || 10000;
 
-// Pega a variável de ambiente CORS_ORIGIN, se não estiver configurada, permite todas as origens
-const corsOrigin = process.env.CORS_ORIGIN || '*';
+// Use CORS para permitir requisições de qualquer origem
+app.use(cors());
 
-app.use(cors({ origin: corsOrigin }));  // Usa a variável de ambiente para a origem
+// Se você quiser permitir apenas requisições de um domínio específico
+// app.use(cors({ origin: 'https://br135.tribalwars.com.br' }));
+
 app.use(express.json());
 
 let ataques = [];  // Aqui serão armazenados os dados dos ataques recebidos
 
 // Endpoint para coletar ataques de todos os jogadores
 app.get('/api/ataques', (req, res) => {
+    // Retorna todos os ataques cadastrados, sem filtro
     res.json({ ataques });
 });
 
@@ -23,7 +26,7 @@ app.get('/api/ataques/:jogador', (req, res) => {
     res.json(ataquesJogador);
 });
 
-// Endpoint para adicionar ataques
+// Endpoint para adicionar ataques (simulando que um jogador enviou seus dados)
 app.post('/api/ataques', (req, res) => {
     const { jogador, ataques: novosAtaques } = req.body;
     ataques = ataques.filter(atk => atk.defender !== jogador);  // Remove ataques antigos do jogador
