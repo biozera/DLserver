@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+.git
+.gitignore
+.DS_Store
+.vscode
+.idea
+.env
+.env.local
+attacks.db
+attacks.db-shm
+attacks.db-wal
