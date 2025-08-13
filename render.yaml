@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: tw-tribe-attacks
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: "npm ci || npm install"
+    startCommand: "node server.js"
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /var/data/attacks.db
+      - key: ALLOWED_TOKENS
+        value: ""
+      - key: ALLOW_READ_NO_TOKEN
+        value: "true"
+      - key: CORS_ORIGINS
+        value: ""
+    healthCheckPath: /health
+    disk:
+      name: attacks-db
+      mountPath: /var/data
+      sizeGB: 1
