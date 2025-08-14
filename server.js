@@ -32,6 +32,16 @@ CREATE TABLE IF NOT EXISTS attacks (
 app.use(cors());
 app.use(express.json());
 
+// Função de limpeza automática
+function cleanOldAttacks() {
+    const now = Date.now();
+    const stmt = db.prepare(`DELETE FROM attacks WHERE arrival_at <= ?`);
+    const info = stmt.run(now);
+    if (info.changes > 0) {
+        console.log(`[CLEANUP] Removidos ${info.changes} ataques antigos`);
+    }
+}
+
 // === ENDPOINT: RECEBER ATAQUES ===
 app.post('/api/attacks', (req, res) => {
     const token = req.headers['x-auth-token'];
@@ -79,6 +89,9 @@ app.post('/api/attacks', (req, res) => {
 
         insertMany(attacks);
 
+        // Limpa ataques vencidos
+        cleanOldAttacks();
+
         res.json({ ok: true, count: attacks.length });
     } catch (err) {
         console.error('Erro ao salvar ataques:', err);
@@ -96,11 +109,17 @@ app.get('/api/attacks', (req, res) => {
     }
 
     try {
+        const now = Date.now();
+
+        // Limpa ataques vencidos antes de buscar
+        cleanOldAttacks();
+
         const rows = db.prepare(`
             SELECT * FROM attacks
             WHERE world = ?
+              AND arrival_at > ?
             ORDER BY arrival_at ASC
-        `).all(world);
+        `).all(world, now);
 
         res.json({ ok: true, attacks: rows });
     } catch (err) {
