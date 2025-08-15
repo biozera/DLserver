@@ -32,13 +32,18 @@ CREATE TABLE IF NOT EXISTS attacks (
 app.use(cors());
 app.use(express.json());
 
-// Função de limpeza automática
+// Função de limpeza automática - CORRIGIDA
 function cleanOldAttacks() {
     const now = Date.now();
-    const stmt = db.prepare(`DELETE FROM attacks WHERE arrival_at <= ?`);
-    const info = stmt.run(now);
+    // Margem de segurança: remove apenas ataques que passaram há mais de 1 hora
+    const SAFETY_MARGIN = 60 * 60 * 1000; // 1 hora em milissegundos
+    const cutoffTime = now - SAFETY_MARGIN;
+    
+    const stmt = db.prepare(`DELETE FROM attacks WHERE arrival_at < ?`);
+    const info = stmt.run(cutoffTime);
+    
     if (info.changes > 0) {
-        console.log(`[CLEANUP] Removidos ${info.changes} ataques antigos`);
+        console.log(`[CLEANUP] Removidos ${info.changes} ataques antigos (mais de 1h passados)`);
     }
 }
 
@@ -114,10 +119,11 @@ app.get('/api/attacks', (req, res) => {
         // Limpa ataques vencidos antes de buscar
         cleanOldAttacks();
 
+        // Busca ataques futuros (sem margem aqui, pois queremos mostrar todos os válidos)
         const rows = db.prepare(`
             SELECT * FROM attacks
             WHERE world = ?
-              AND arrival_at > ?
+              AND arrival_at >= ?
             ORDER BY arrival_at ASC
         `).all(world, now);
 
